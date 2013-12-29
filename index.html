@@ -172,12 +172,16 @@
 </head>
 <body id="bc">
 <div id="tc"><div id="tt"></div></div><div id="mc"><div id="md"><!--[if IE]><p class="iehack">.</p><![endif]--></div><form id="tools" action="#"><ul><li>Hae <input type="text" name="ms" id="ms" size="2" maxlength="3" value="5" /> l&auml;hint&auml; pys&auml;kki&auml; <button onclick="getStops(); return false;" id="updatebutton">P&auml;ivit&auml;</button> <progress id="progressbar" max="100" value="1">P&auml;ivitet&auml;&auml;n...</progress><!-- <li><input type="checkbox" name="follow" id="follow" onchange="toggleFollow(this);" /><label for="follow">Seuraa omaa sijaintia</label></li> --></ul></form></div><div id="dd"></div>
-<script src="http://api.maps.nokia.com/2.2.4/jsl.js?with=maps,positioning" type="text/javascript" charset="utf-8">
-</script>
+<script type="text/javascript" charset="UTF-8" src="http://js.cit.api.here.com/se/2.5.3/jsl.js?with=maps,positioning"></script>
 <script type="text/javascript">
  // <![CDATA[
 
  // CONFIGURATION SETTINGS
+
+ // replace with your own API keys
+ // http://developer.here.com/get-started
+ nokia.Settings.set("app_id", "yqfMGb1wO3u3OVxLjGOZ"); 
+ nokia.Settings.set("app_code", "KKZPweFJJaSCY9skdwC13A");
 
  // replace with your own proxy 
  var apiBase = 'http://pubtrans.it/hsl/api-proxy?';
@@ -390,7 +394,6 @@
   if (window.history && history.pushState) {
    var newTitle = center;
   }
-  // alert(center.latitude + ',' + center.longitude);
   var url = new String(document.location).replace(/#[\d\.,]+$/, '') + 
             '#' + center.latitude + ',' + center.longitude;
   if ((stateStatus == 'wait') || !history.replaceState) {
@@ -466,23 +469,16 @@
     var lng = coords[0];
     var lat = coords[1];
     var loc = new nokia.maps.geo.Coordinate(lat, lng, 0, 1);
-    var opts = {}
+    var ico = dimIcons[type];
+    var opts = {'icon': ico, 'anchor': [ico.width/2,ico.height/2]};
     var mrk = new nokia.maps.map.Marker(loc, opts);
-    if (mrk && ico) {
+    if (mrk) {
      mrk.set('stop', id);
-/*
      mrk.set('stopStyle', type);
-     var ico = dimIcons[type];
-     mrk.set('icon', ico);
-     mrk.set('anchor', [ico.width/2,ico.height/2]);
      mrk.addListener('click', showInfo, true);
      mrk.addListener('tap', showInfo, true);
-*/
-     stopMarkers.objects.add(mrk);
-     map.objects.add(mrk);
+     stopMarkers.objects.add(mrk, stopMarkers.objects.getLength());
      map.update(10, true);
-     addedMarkers = stopMarkers;
-     fitMap();
      var d = new Date();
      var h = d.getHours();
      var m = d.getMinutes() - 5;
@@ -569,7 +565,6 @@
          timeTable.appendChild(tr);
         }
         // last line type defines stop type
-        setStopType(id, type);
         var myDiv = document.createElement('div');
         var h1 = document.createElement('h1');
         var a = document.createElement('a');
@@ -615,9 +610,9 @@
      xhr[id].send(null);
     }
    }
-   // addedMarkers = stopMarkers;
-   // map.objects.add(addedMarkers);
-   // fitMap();
+   addedMarkers = stopMarkers;
+   map.objects.add(addedMarkers);
+   fitMap();
   }
   else if (this.readyState == 4) {
    setBar(100);
@@ -677,19 +672,7 @@
    // addedVehicles.objects.addAll(vehicleMarkers);
   }
  }
- function setStopType(id, type) {
-  for (var i=0; i<addedMarkers.objects.getLength(); i++) {
-   var mrk = addedMarkers.objects.get(i);
-   if (mrk.get('stop') == id) {
-    mrk.stopStyle = type;
-    var ico = dimIcons[type];
-    mrk.set('icon', ico);
-    mrk.set('anchor', [ico.width/2,ico.height/2]);
-    mrk.addListener('click', showInfo, true);
-    mrk.addListener('tap', showInfo, true);
-   }
-  }
- }
+
  function showInfo(e) {
   if (e.target == activeStop) {
    hideInfo();
